@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Whack A Mole!</title>
+
+        <link rel="stylesheet" href="style.css">
+    </head>
+<body>
+
+
+    <h1>Whack-a-mole! <span class="score">0</span></h1>
+    
+    <p>You have: <span id="timer1">0</span> seconds remaining!</p>
+
+
+
+    <button class="starter" id="playAgainButton" onclick="startGame()">Start!</button>
+
+
+    <div class="game">
+        <div class="hole hole1">
+            <div class="mole"></div>
+        </div>
+        <div class="hole hole2">
+            <div class="mole"></div>
+        </div>
+        <div class="hole hole3">
+            <div class="mole"></div>
+        </div>
+        <div class="hole hole4">
+            <div class="mole"></div>
+        </div>
+        <div class="hole hole5">
+            <div class="mole"></div>
+        </div>
+        <div class="hole hole6">
+            <div class="mole"></div>
+        </div>
+    </div>
+
+    <script>
+        const holes = document.querySelectorAll('.hole');
+        const scoreBoard = document.querySelector('.score');
+        const moles = document.querySelectorAll('.mole');
+        const timer = document.getElementById('timer1');
+        let lastHole;
+        let timeUp = false;
+        let score = 0;
+        let timerInterval;
+        let timeLeft = 60;
+    
+        function randomTime(min, max) {
+            return Math.round(Math.random() * (max - min) + min);
+        }
+    
+        function randomHole(holes) {
+            const idx = Math.floor(Math.random() * holes.length);
+            const hole = holes[idx];
+            if (hole == lastHole) {
+                console.log('Ah nah thats the same one buddy');
+                return randomHole(holes);
+            }
+            lastHole = hole;
+            return hole;
+        }
+    
+        function gameOver() {
+            clearInterval(timerInterval);
+            document.getElementById('playAgainButton').style.display = 'block';
+            document.getElementById('playAgainButton').addEventListener('click', startGame);
+        }
+    
+        function peep() {
+            const time = randomTime(200, 1000);
+            const hole = randomHole(holes);
+            hole.classList.add('up');
+    
+            setTimeout(() => {
+                hole.classList.remove('up');
+                if (!timeUp) peep();
+            }, time);
+        }
+    
+        function updateTimer() {
+            timeLeft = timeLeft - 1;
+            if (timeLeft >= 0) {
+                timer.textContent = timeLeft;
+            } else {
+                gameOver();
+            }
+        }
+    
+        function startGame() {
+            if (timerInterval) {
+                clearInterval(timerInterval); // Clear existing timer interval
+            }
+            scoreBoard.textContent = 0;
+            timeUp = false;
+            score = 0;
+            peep();
+            setTimeout(() => (timeUp = true), 60000);
+            timerInterval = setInterval(updateTimer, 1000);
+            updateTimer();
+            document.getElementById('playAgainButton').style.display = 'none';
+
+        }
+    
+        function bonk(e) {
+            if (!e.isTrusted) return;
+            score++;
+            this.classList.remove('up');
+            scoreBoard.textContent = score;
+        }
+    
+        moles.forEach((mole) => mole.addEventListener('click', bonk));
+    
+        // Add a single event listener to the "Start!" button
+        document.getElementById('playAgainButton').addEventListener('click', startGame);
+    </script>
+    
+</body>
+</html>
